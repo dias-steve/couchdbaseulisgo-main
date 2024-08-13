@@ -24,6 +24,7 @@ type controllerGeneric[Entities any, Dto any] struct {
 	hydrateEntites func(r *http.Request, id string, entities *Entities, isUpdate bool) error
 }
 
+// NewControllerGeneric will create a new controller for the given entity
 func NewControllerGeneric[Entities any, Dto any](repository Repository[Entities], hydrateEntites func(r *http.Request, id string, entities *Entities, isUpdate bool) error) ControllerGeneric {
 	return &controllerGeneric[Entities, Dto]{
 		repository:     repository,
@@ -32,6 +33,7 @@ func NewControllerGeneric[Entities any, Dto any](repository Repository[Entities]
 	}
 }
 
+// GetAll will return all the entities
 func (c *controllerGeneric[Entities, Dto]) GetAll(w http.ResponseWriter, r *http.Request) {
 	methodName := "Conroller Generic > GetAll"
 	pageSize, currentPage := ExtractPageParamsFromRequest(r)
@@ -47,6 +49,7 @@ func (c *controllerGeneric[Entities, Dto]) GetAll(w http.ResponseWriter, r *http
 	json.NewEncoder(w).Encode(resultDto)
 }
 
+// GetBySearch will return the entities that match the search
 func (c *controllerGeneric[Entities, Dto]) GetBySearch(w http.ResponseWriter, r *http.Request) {
 	methodName := "Conroller Generic > GetAll"
 	pageSize, currentPage := ExtractPageParamsFromRequest(r)
@@ -62,6 +65,7 @@ func (c *controllerGeneric[Entities, Dto]) GetBySearch(w http.ResponseWriter, r 
 	json.NewEncoder(w).Encode(resultDto)
 }
 
+// GetSingle will return the entity with the given id
 func (c *controllerGeneric[Entities, Dto]) GetSingle(w http.ResponseWriter, r *http.Request) {
 	methodName := "Conroller Generic > GetSingle"
 	vars := mux.Vars(r)
@@ -77,6 +81,7 @@ func (c *controllerGeneric[Entities, Dto]) GetSingle(w http.ResponseWriter, r *h
 	json.NewEncoder(w).Encode(resultDto)
 }
 
+// Create will create a new entity
 func (c *controllerGeneric[Entities, Dto]) Create(w http.ResponseWriter, r *http.Request) {
 	methodName := "Conroller Generic > Create"
 	var entityDto Dto
@@ -107,6 +112,7 @@ func (c *controllerGeneric[Entities, Dto]) Create(w http.ResponseWriter, r *http
 	json.NewEncoder(w).Encode(resultDto)
 }
 
+// Update will update the entity with the given id
 func (c *controllerGeneric[Entities, Dto]) Update(w http.ResponseWriter, r *http.Request) {
 	methodName := "Conroller Generic > Update"
 	vars := mux.Vars(r)
@@ -135,6 +141,7 @@ func (c *controllerGeneric[Entities, Dto]) Update(w http.ResponseWriter, r *http
 	json.NewEncoder(w).Encode(resultDto)
 }
 
+// Delete will delete the entity with the given id
 func (c *controllerGeneric[Entities, Dto]) Delete(w http.ResponseWriter, r *http.Request) {
 	methodName := "Conroller Generic > Delete"
 	vars := mux.Vars(r)
