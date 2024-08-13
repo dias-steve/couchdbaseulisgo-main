@@ -43,7 +43,8 @@ func GrafanaCredentialRouterExemple(router *mux.Router) {
 
 	var Cluster *gocb.Cluster
 
-	couchdbUtils.ExpressRouterController[entities.GrafanaCredentialsEntity, entities.GrafanaCredentialsEntity](Cluster, router, "credentials", "credential_id", CoGrafanaCredentials, nil, false, func(r *http.Request, id string, newCredential *entities.GrafanaCredentialsEntity, isUpdate bool) (err error) {
+	// Exemple of use of the couchdbUtils.CreateCouchbaseContext
+	couchdbUtils.ExpressRouterController[entities.GrafanaCredentialsEntity, entities.GrafanaCredentialsEntity](Cluster, router, "/credentials", "credential_id", CoGrafanaCredentials, nil, false, func(r *http.Request, id string, newCredential *entities.GrafanaCredentialsEntity, isUpdate bool) (err error) {
 
 		if newCredential == nil {
 			return couchdbUtils.NewError(400, "Body is required")
