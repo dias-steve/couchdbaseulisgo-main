@@ -26,6 +26,7 @@ func main() {
 		AllowCredentials: false,
 	})
 
+	//Exemple of use of the couchdbUtils.ExpressRouterController
 	GrafanaCredentialRouterExemple(r)
 
 	handler := c.Handler(r)
@@ -35,6 +36,7 @@ func main() {
 	log.Fatal(http.ListenAndServe(apiPort, handler))
 }
 
+// Exemple of use of the couchdbUtils.ExpressRouterController
 func GrafanaCredentialRouterExemple(router *mux.Router) {
 
 	var CoGrafanaCredentials *gocb.Collection
@@ -42,14 +44,17 @@ func GrafanaCredentialRouterExemple(router *mux.Router) {
 	var Cluster *gocb.Cluster
 
 	couchdbUtils.ExpressRouterController[entities.GrafanaCredentialsEntity, entities.GrafanaCredentialsEntity](Cluster, router, "credentials", "credential_id", CoGrafanaCredentials, nil, false, func(r *http.Request, id string, newCredential *entities.GrafanaCredentialsEntity, isUpdate bool) (err error) {
+
 		if newCredential == nil {
 			return couchdbUtils.NewError(400, "Body is required")
 		}
 
+		// Check if the writing is an update or a new document
 		if !isUpdate {
 			newCredential.CredentialId = id
 		}
 
+		//
 		if newCredential.PasswordGrafana == "" {
 			return couchdbUtils.NewError(400, "Password is required")
 		}
