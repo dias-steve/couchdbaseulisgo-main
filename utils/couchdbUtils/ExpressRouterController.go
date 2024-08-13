@@ -149,6 +149,16 @@ func (c *controllerGeneric[Entities, Dto]) Delete(w http.ResponseWriter, r *http
 
 }
 
+// EpressRouterController is a function that creates a router for a given entity
+// cluster: the couchbase cluster
+// router: the router to add the routes
+// baseURL: the base url for the entity
+// idKey: the key for the id document
+// collection: the collection for the entity
+// authMiddleware: the middleware for the authorization
+// withMiddleware: if the routes should use the middleware
+// hydrateEntites: a function to hydrate the entities when the entity is created or updated
+// the function will create the following routes: GET /baseURL, POST /baseURL, GET /baseURL/search, GET /baseURL/{id}, PUT /baseURL/{id}, DELETE /baseURL/{id}
 func ExpressRouterController[Entities any, Dto any](cluster *gocb.Cluster, router *mux.Router, baseURL string, idKey string, collection *gocb.Collection, authMiddleware func(next http.HandlerFunc) http.HandlerFunc, withMiddleware bool, hydrateEntites func(r *http.Request, id string, entities *Entities, isUpdate bool) (err error)) {
 	var controller = NewControllerGeneric[Entities, Dto](NewRepository[Entities](cluster, collection, idKey), hydrateEntites)
 
