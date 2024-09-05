@@ -147,6 +147,10 @@ func ExtractOperatorWhere(input string) (field string, operartor string, value s
 
 	tableString := strings.Split(input, operartor)
 
+	if len(tableString) > 2 {
+		tableString[1] = strings.Join(tableString[1:], operartor)
+	}
+
 	if len(tableString) < 2 {
 		return field, operartor, value, errors.New("No format no valid")
 	}
