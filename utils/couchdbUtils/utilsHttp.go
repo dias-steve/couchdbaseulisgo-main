@@ -134,6 +134,8 @@ func ConvertWhereParamToWhereList(input string) (wherelist []string) {
 }
 
 func ExtractOperatorWhere(input string) (field string, operartor string, value string, err error) {
+	// double sign operator is for number comparison
+	// single sign operator is for string comparison
 	operators := []string{"!<<in>>", "<<in>>", "!<<=", "!>>=", "<<=", ">>=", "!<<", "!>>", "<<", ">>", "!==", "==", "!<=", "!>=", "<=", ">=", "!=", "=", "!<in>", "<in>", "!>", "!<", ">", "<"}
 
 	for _, operatorFound := range operators {

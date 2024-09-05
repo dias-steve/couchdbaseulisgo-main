@@ -44,13 +44,7 @@ func GrafanaCredentialRouterExemple(router *mux.Router) {
 
 	var Cluster *gocb.Cluster // is to set
 
-	// Exemple of use of the couchdbUtils.CreateCouchbaseContext
-	//
-	// The function will create the GET /credentials, POST /credentials, GET /credentials/search, GET /credentials/{id}, PUT /credentials/{id}, DELETE /credentials/{id}
-	//
-	//couchdbUtils.CreateCouchbaseContext[<entity in DB>, <entity shown out of the router>](<Cluster Object>, <RouterObject>, <AtttributeIDName>, <CollectionObject>, <MidlewareFunc> ,<isActivate Middleware> ,<Create or Update function>)
-	couchdbUtils.ExpressRouterController[entities.GrafanaCredentialsEntity, entities.GrafanaCredentialsDto](Cluster, router, "/credentials", "credential_id", CoGrafanaCredentials, nil, false, func(r *http.Request, id string, newCredential *entities.GrafanaCredentialsEntity, isUpdate bool) (err error) {
-
+	hydateEntites := func(r *http.Request, id string, newCredential *entities.GrafanaCredentialsEntity, isUpdate bool) error {
 		// Check if the writing is an update or a new document
 		if !isUpdate {
 			// if is not update > then is a creation, we set the new id generated to the entity
@@ -78,6 +72,24 @@ func GrafanaCredentialRouterExemple(router *mux.Router) {
 
 		// If all is ok, we return nil > then the entity will be saved
 		return nil
-	})
+	}
+	expressRouterConfig := couchdbUtils.RouterConfig[entities.GrafanaCredentialsEntity, entities.GrafanaCredentialsDto]{
+		Cluster:         Cluster,
+		Router:          router,
+		BaseURL:         "/credentials",
+		IdKey:           "credential_id",
+		Collection:      CoGrafanaCredentials,
+		AuthMiddleware:  nil,
+		WithMiddleware:  false,
+		HydrateEntities: hydateEntites,
+		BlackListMethod: []string{"PUT", "POST", "DELETE"},
+	}
+
+	// Exemple of use of the couchdbUtils.CreateCouchbaseContext
+	//
+	// The function will create the GET /credentials, POST /credentials, GET /credentials/search, GET /credentials/{id}, PUT /credentials/{id}, DELETE /credentials/{id}
+	//
+	//couchdbUtils.CreateCouchbaseContext[<entity in DB>, <entity shown out of the router>](<Cluster Object>, <RouterObject>, <AtttributeIDName>, <CollectionObject>, <MidlewareFunc> ,<isActivate Middleware> ,<Create or Update function>)
+	couchdbUtils.ExpressRouterController[entities.GrafanaCredentialsEntity, entities.GrafanaCredentialsDto](expressRouterConfig)
 
 }

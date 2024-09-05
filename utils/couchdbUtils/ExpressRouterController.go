@@ -34,6 +34,12 @@ func NewControllerGeneric[Entities any, Dto any](repository Repository[Entities]
 }
 
 // GetAll will return all the entities
+//
+// Exemple of use: /baseURL?currentPage=1&pageSize=10&whereQuery=field1==ok|field2<in>value2,value2&orderByQuery=-field1
+//   - Separator for parameter whereQuery: |
+//   - Operator available for string comparaison: =, !=, <, >, <=, >=, <in>, !<in>
+//   - Operator available for number comparaison: ==, !==, <<, <>, <<=, >>=, <<in>>, !<<in>>
+//   - Separator for in comparaison: ,
 func (c *controllerGeneric[Entities, Dto]) GetAll(w http.ResponseWriter, r *http.Request) {
 	methodName := "Conroller Generic > GetAll"
 	pageSize, currentPage := ExtractPageParamsFromRequest(r)
@@ -50,6 +56,8 @@ func (c *controllerGeneric[Entities, Dto]) GetAll(w http.ResponseWriter, r *http
 }
 
 // GetBySearch will return the entities that match the search
+//
+// Exemple of use: /baseURL/search?query=example
 func (c *controllerGeneric[Entities, Dto]) GetBySearch(w http.ResponseWriter, r *http.Request) {
 	methodName := "Conroller Generic > GetAll"
 	pageSize, currentPage := ExtractPageParamsFromRequest(r)
@@ -156,33 +164,92 @@ func (c *controllerGeneric[Entities, Dto]) Delete(w http.ResponseWriter, r *http
 
 }
 
-// EpressRouterController is a function that creates a router for a given entity
-// cluster: the couchbase cluster
-// router: the router to add the routes
-// baseURL: the base url for the entity
-// idKey: the key for the id document
-// collection: the collection couchbase
-// authMiddleware: the middleware for the authorization
-// withMiddleware: if the routes should use the middleware : set true to use the middleware
-// hydrateEntites: a function to hydrate the entities when the entity is created or updated
-// the function will create the following routes: GET /baseURL, POST /baseURL, GET /baseURL/search, GET /baseURL/{id}, PUT /baseURL/{id}, DELETE /baseURL/{id}
-func ExpressRouterController[Entities any, Dto any](cluster *gocb.Cluster, router *mux.Router, baseURL string, idKey string, collection *gocb.Collection, authMiddleware func(next http.HandlerFunc) http.HandlerFunc, withMiddleware bool, hydrateEntites func(r *http.Request, id string, entities *Entities, isUpdate bool) (err error)) {
-	var controller = NewControllerGeneric[Entities, Dto](NewRepository[Entities](cluster, collection, idKey), hydrateEntites)
+// RouterConfig is the configuration for the router
+type RouterConfig[Entities any, Dto any] struct {
+	// cluster: the couchbase cluster
+	Cluster *gocb.Cluster
+	// router: the router to add the routes
+	Router *mux.Router
+	// baseURL: the base url for the entity
+	BaseURL string
+	// idKey: the key for the id document
+	IdKey string
+	// collection: the collection couchbase
+	Collection *gocb.Collection
+	// authMiddleware: the middleware for the authorization
+	AuthMiddleware func(next http.HandlerFunc) http.HandlerFunc
+	// withMiddleware: if the routes should use the middleware : set true to use the middleware
+	WithMiddleware bool
+	// hydrateEntites: a function to hydrate the entities when the entity is created or updated
+	HydrateEntities func(r *http.Request, id string, entities *Entities, isUpdate bool) error
+	// blackListMethod: the methods to not expose
+	BlackListMethod []string
+}
 
-	if withMiddleware {
-		router.HandleFunc(baseURL, authMiddleware(controller.GetAll)).Methods("GET")
-		router.HandleFunc(baseURL, authMiddleware(controller.Create)).Methods("POST")
-		router.HandleFunc(baseURL+"/search", authMiddleware(controller.GetBySearch)).Methods("GET")
-		router.HandleFunc(baseURL+"/{id}", authMiddleware(controller.GetSingle)).Methods("GET")
-		router.HandleFunc(baseURL+"/{id}", authMiddleware(controller.Update)).Methods("PUT")
-		router.HandleFunc(baseURL+"/{id}", authMiddleware(controller.Delete)).Methods("DELETE")
-	} else {
-		router.HandleFunc(baseURL, controller.GetAll).Methods("GET")
-		router.HandleFunc(baseURL, controller.Create).Methods("POST")
-		router.HandleFunc(baseURL+"/search", controller.GetBySearch).Methods("GET")
-		router.HandleFunc(baseURL+"/{id}", controller.GetSingle).Methods("GET")
-		router.HandleFunc(baseURL+"/{id}", controller.Update).Methods("PUT")
-		router.HandleFunc(baseURL+"/{id}", controller.Delete).Methods("DELETE")
+// # EpressRouterController is a function that creates a router for a given entity
+//
+// The function will create the following routes:
+//   - GET /baseURL with params: currentPage, pageSize, whereQuery, orderByQuery
+//   - GET /baseURL/search with params: query
+//   - GET /baseURL/{id}
+//   - PUT /baseURL/{id}
+//   - DELETE /baseURL/{id}
+//   - POST /baseURL
+//
+// # GET /baseURL
+// Return all the entities
+//   - Exemple of use: /baseURL?currentPage=1&pageSize=10&whereQuery=field1==ok|field2<in>value2,value2&orderByQuery=-field1
+//   - Separator for parameter whereQuery: |
+//   - Operator available for string comparaison: =, !=, <, >, <=, >=, <in>, !<in>
+//   - Operator available for number comparaison: ==, !==, <<, <>, <<=, >>=, <<in>>, !<<in>>
+//   - Separator for in comparaison: ,
+//
+// # GET /baseURL/search
+//
+// Return the entities that match the search
+//   - Exemple of use: /baseURL/search?query=example
+//
+// # GET /baseURL/{id}
+//
+// # Return the entity with the given id
+//
+// # POST /baseURL
+//
+// # Create a new entity
+//
+// # PUT /baseURL/{id}
+//
+// # Update the entity with the given id
+//
+// # DELETE /baseURL/{id}
+//
+// Delete the entity with the given id
+func ExpressRouterController[Entities any, Dto any](config RouterConfig[Entities, Dto]) {
+	var controller = NewControllerGeneric[Entities, Dto](NewRepository[Entities](config.Cluster, config.Collection, config.IdKey), config.HydrateEntities)
+
+	middleware := func(next http.HandlerFunc) http.HandlerFunc {
+		if config.AuthMiddleware != nil && config.WithMiddleware {
+			return config.AuthMiddleware(next)
+		}
+		return next
+	}
+
+	if !includes(config.BlackListMethod, "GET") {
+		config.Router.HandleFunc(config.BaseURL, middleware(controller.GetAll)).Methods("GET")
+		config.Router.HandleFunc(config.BaseURL+"/search", middleware(controller.GetBySearch)).Methods("GET")
+		config.Router.HandleFunc(config.BaseURL+"/{id}", middleware(controller.GetSingle)).Methods("GET")
+	}
+
+	if !includes(config.BlackListMethod, "POST") {
+		config.Router.HandleFunc(config.BaseURL, middleware(controller.Create)).Methods("POST")
+	}
+
+	if !includes(config.BlackListMethod, "PUT") {
+		config.Router.HandleFunc(config.BaseURL+"/{id}", middleware(controller.Update)).Methods("PUT")
+	}
+
+	if !includes(config.BlackListMethod, "DELETE") {
+		config.Router.HandleFunc(config.BaseURL+"/{id}", middleware(controller.Delete)).Methods("DELETE")
 	}
 
 }
