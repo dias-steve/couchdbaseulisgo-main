@@ -5,8 +5,8 @@ import (
 	"log"
 	"net/http"
 
-	"gitlab.com/myjoule/couchbaseutilsgo/entities"
-	"gitlab.com/myjoule/couchbaseutilsgo/utils/couchdbUtils"
+	"github.com/dias-steve/couchdbaseulisgo-main/entities"
+	"github.com/dias-steve/couchdbaseulisgo-main/utils/couchdbUtils"
 
 	"time"
 

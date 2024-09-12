@@ -1,4 +1,4 @@
-module gitlab.com/myjoule/couchbaseutilsgo
+module github.com/dias-steve/couchdbaseulisgo-main
 
 go 1.22
 

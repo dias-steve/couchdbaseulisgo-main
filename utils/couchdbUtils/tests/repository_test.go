@@ -5,7 +5,7 @@ import (
 	"log"
 	"testing"
 
-	"gitlab.com/myjoule/couchbaseutilsgo/utils/couchdbUtils"
+	"github.com/dias-steve/couchdbaseulisgo-main/utils/couchdbUtils"
 
 	"github.com/couchbase/gocb/v2"
 )

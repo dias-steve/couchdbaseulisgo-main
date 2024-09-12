@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"gitlab.com/myjoule/couchbaseutilsgo/utils/couchdbUtils"
+	"github.com/dias-steve/couchdbaseulisgo-main/utils/couchdbUtils"
 )
 
 func TestGetInsertFeildsFormatedQuery(t *testing.T) {
