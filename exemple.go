@@ -1,11 +1,12 @@
-package main
+package exmeple
 
 import (
-	"couchbaseUtilsGo/entities"
-	"couchbaseUtilsGo/utils/couchdbUtils"
 	"fmt"
 	"log"
 	"net/http"
+
+	"gitlab.com/myjoule/couchbaseutilsgo/entities"
+	"gitlab.com/myjoule/couchbaseutilsgo/utils/couchdbUtils"
 
 	"time"
 
@@ -14,7 +15,7 @@ import (
 	"github.com/rs/cors"
 )
 
-func main() {
+func mainExemple() {
 	r := mux.NewRouter()
 
 	apiPort := ":8080"

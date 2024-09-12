@@ -1,10 +1,11 @@
 package tests
 
 import (
-	"couchbaseUtilsGo/utils/couchdbUtils"
 	"fmt"
 	"log"
 	"testing"
+
+	"gitlab.com/myjoule/couchbaseutilsgo/utils/couchdbUtils"
 
 	"github.com/couchbase/gocb/v2"
 )

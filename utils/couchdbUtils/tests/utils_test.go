@@ -1,10 +1,11 @@
 package tests
 
 import (
-	"couchbaseUtilsGo/utils/couchdbUtils"
 	"fmt"
 	"testing"
 	"time"
+
+	"gitlab.com/myjoule/couchbaseutilsgo/utils/couchdbUtils"
 )
 
 func TestGetInsertFeildsFormatedQuery(t *testing.T) {
