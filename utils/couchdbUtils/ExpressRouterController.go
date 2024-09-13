@@ -92,9 +92,16 @@ func (c *controllerGeneric[Entities, Dto]) GetSingle(w http.ResponseWriter, r *h
 // Create will create a new entity
 func (c *controllerGeneric[Entities, Dto]) Create(w http.ResponseWriter, r *http.Request) {
 	methodName := "Conroller Generic > Create"
+
+	if r.Body == nil {
+		err := NewError(400, "Body is required")
+		HandleAndSendError(err, w, methodName)
+		return
+	}
 	var entityDto Dto
 	err := json.NewDecoder(r.Body).Decode(&entityDto)
 	if err != nil {
+		err = NewError(400, err.Error())
 		HandleAndSendError(err, w, methodName)
 		return
 	}
@@ -123,11 +130,18 @@ func (c *controllerGeneric[Entities, Dto]) Create(w http.ResponseWriter, r *http
 // Update will update the entity with the given id
 func (c *controllerGeneric[Entities, Dto]) Update(w http.ResponseWriter, r *http.Request) {
 	methodName := "Conroller Generic > Update"
+
+	if r.Body == nil {
+		err := NewError(400, "Body is required")
+		HandleAndSendError(err, w, methodName)
+		return
+	}
 	vars := mux.Vars(r)
 	id := vars["id"]
 	var entityDto Dto
 	err := json.NewDecoder(r.Body).Decode(&entityDto)
 	if err != nil {
+		err = NewError(400, err.Error())
 		HandleAndSendError(err, w, methodName)
 		return
 	}
