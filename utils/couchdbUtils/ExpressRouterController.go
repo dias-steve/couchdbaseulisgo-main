@@ -19,17 +19,19 @@ type ControllerGeneric interface {
 }
 
 type controllerGeneric[Entities any, Dto any] struct {
-	repository     Repository[Entities]
-	converter      DtoConverter[Entities, Dto]
-	hydrateEntites func(r *http.Request, id string, entities *Entities, isUpdate bool) error
+	repository           Repository[Entities]
+	converter            DtoConverter[Entities, Dto]
+	hydrateEntites       func(r *http.Request, id string, entities *Entities, isUpdate bool) error
+	getPreWhereQueryFunc func(r *http.Request) []string
 }
 
 // NewControllerGeneric will create a new controller for the given entity
-func NewControllerGeneric[Entities any, Dto any](repository Repository[Entities], hydrateEntites func(r *http.Request, id string, entities *Entities, isUpdate bool) error) ControllerGeneric {
+func NewControllerGeneric[Entities any, Dto any](repository Repository[Entities], hydrateEntites func(r *http.Request, id string, entities *Entities, isUpdate bool) error, getPreWhereQueryFunc func(r *http.Request) []string) ControllerGeneric {
 	return &controllerGeneric[Entities, Dto]{
-		repository:     repository,
-		converter:      NewDtoConverter[Entities, Dto](),
-		hydrateEntites: hydrateEntites,
+		repository:           repository,
+		converter:            NewDtoConverter[Entities, Dto](),
+		hydrateEntites:       hydrateEntites,
+		getPreWhereQueryFunc: getPreWhereQueryFunc,
 	}
 }
 
@@ -40,10 +42,21 @@ func NewControllerGeneric[Entities any, Dto any](repository Repository[Entities]
 //   - Operator available for string comparaison: =, !=, <, >, <=, >=, <in>, !<in>
 //   - Operator available for number comparaison: ==, !==, <<, <>, <<=, >>=, <<in>>, !<<in>>
 //   - Separator for in comparaison: ,
+
 func (c *controllerGeneric[Entities, Dto]) GetAll(w http.ResponseWriter, r *http.Request) {
 	methodName := "Conroller Generic > GetAll"
 	pageSize, currentPage := ExtractPageParamsFromRequest(r)
 	where, orderBy := ExtractWhereOrderByParamsFromRequest(r)
+
+	preWhere := []string{}
+
+	// Add the preWher query
+	if c.getPreWhereQueryFunc != nil {
+		preWhere = c.getPreWhereQueryFunc(r)
+	}
+
+	where = append(where, preWhere...)
+
 	result, err := c.repository.FindAllWithPagination(pageSize, currentPage, orderBy, where...)
 	if err != nil {
 		HandleAndSendError(err, w, methodName)
@@ -62,7 +75,18 @@ func (c *controllerGeneric[Entities, Dto]) GetBySearch(w http.ResponseWriter, r 
 	methodName := "Conroller Generic > GetAll"
 	pageSize, currentPage := ExtractPageParamsFromRequest(r)
 	search := r.URL.Query().Get("query")
-	result, err := c.repository.Search(search, pageSize, currentPage)
+
+	where, _ := ExtractWhereOrderByParamsFromRequest(r)
+
+	preWhere := []string{}
+
+	if c.getPreWhereQueryFunc != nil {
+		preWhere = c.getPreWhereQueryFunc(r)
+	}
+
+	where = append(where, preWhere...)
+
+	result, err := c.repository.Search(search, pageSize, currentPage, where...)
 	if err != nil {
 		HandleAndSendError(err, w, methodName)
 		return
@@ -198,6 +222,9 @@ type RouterConfig[Entities any, Dto any] struct {
 	HydrateEntities func(r *http.Request, id string, entities *Entities, isUpdate bool) error
 	// blackListMethod: the methods to not expose
 	BlackListMethod []string
+
+	// func witch return the list of where query to add to the all Get query
+	GetPreWhereQueryGet func(r *http.Request) []string
 }
 
 // # EpressRouterController is a function that creates a router for a given entity
@@ -239,7 +266,7 @@ type RouterConfig[Entities any, Dto any] struct {
 //
 // Delete the entity with the given id
 func ExpressRouterController[Entities any, Dto any](config RouterConfig[Entities, Dto]) {
-	var controller = NewControllerGeneric[Entities, Dto](NewRepository[Entities](config.Cluster, config.Collection, config.IdKey), config.HydrateEntities)
+	var controller = NewControllerGeneric[Entities, Dto](NewRepository[Entities](config.Cluster, config.Collection, config.IdKey), config.HydrateEntities, config.GetPreWhereQueryGet)
 
 	middleware := func(next http.HandlerFunc) http.HandlerFunc {
 		if config.AuthMiddleware != nil && config.WithMiddleware {
