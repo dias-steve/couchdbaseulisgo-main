@@ -59,11 +59,12 @@ go get https://github.com/dias-steve/couchdbaseulisgo-main.git
 ```go
 
     type UserEntity{
-        UserId string
-        Name string
-        LastName string 
-        UserName string
-        Password string
+        UserId string `json:"user_id"`
+        SessionId string `json:"user_session_id"`
+        Name string `json:"user_name"`
+        LastName string `json:"user_lastname"`
+        UserName string `json:"user_username"`
+        Password string `json:"user_password"`
     }
 
 ```
@@ -71,10 +72,11 @@ go get https://github.com/dias-steve/couchdbaseulisgo-main.git
 We choose to not show the password attribut throw the API
 ```go
     type UserDTO{
-        UserId string
-        Name string
-        LastName string 
-        UserName string
+        UserId string `json:"user_id"`
+        SessionId string `json:"user_session_id"`
+        Name string `json:"user_name"`
+        LastName string `json:"user_lastname"`
+        UserName string `json:"user_username"`
     }
 
 ```
@@ -129,6 +131,31 @@ The goal of this function is to set the right information in the entite object
 	}
 
 ```
+
+### Create a GetPreWhereQueryGet (Optional)
+This function is called when a Get is requested
+This function add where condition to the requested
+```go 
+    getPreWhereQuery :=func(r *http.Request) []string {
+
+        whereConditionList := []string{}
+        
+        userId := context.Get(r, "user")
+        userIdFormated := userId.(string)
+
+
+        //Here we want just the user of the session
+
+        whereConditionList = append( whereConditionList , "user_session_id = '"+userIdFormated+"'")
+
+
+
+
+
+		return whereConditionList
+	}
+```
+
 ### Initialise the expressRouterConfig object
 ```go
 	expressRouterConfig := couchdbUtils.RouterConfig[entities.UserEntity, entities.UserDto]{
