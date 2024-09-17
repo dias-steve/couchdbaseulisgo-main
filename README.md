@@ -20,7 +20,7 @@ go get https://github.com/dias-steve/couchdbaseulisgo-main.git
    - DELETE /baseURL/{id}
    - POST /baseURL
 
- # GET /baseURL
+ ## GET /baseURL
  Return all the entities
    - Exemple of use:
    /baseURL?currentPage=1&pageSize=10&whereQuery=field1==ok|field2<in>value2,value2&orderByQuery=-field1
@@ -29,24 +29,24 @@ go get https://github.com/dias-steve/couchdbaseulisgo-main.git
    - Operator available for number comparaison: ==, !==, <<, <>, <<=, >>=, <<in>>, !<<in>>
    - Separator for in comparaison: ,
 
- # GET /baseURL/search
+ ## GET /baseURL/search
 
  Return the entities that match the search
    - Exemple of use: /baseURL/search?query=example
 
- # GET /baseURL/{id}
+ ## GET /baseURL/{id}
 
- # Return the entity with the given id
+ Return the entity with the given id
 
- # POST /baseURL
+ ## POST /baseURL
 
- # Create a new entity
+ Create a new entity
 
- # PUT /baseURL/{id}
+ ## PUT /baseURL/{id}
 
- # Update the entity with the given id
+ Update the entity with the given id
 
- # DELETE /baseURL/{id}
+ ## DELETE /baseURL/{id}
 
  Delete the entity with the given id
 
