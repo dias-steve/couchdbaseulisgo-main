@@ -54,7 +54,7 @@ go get https://github.com/dias-steve/couchdbaseulisgo-main.git
 
 
 
-### Creaing of User Entities & DTO
+### Creating of User Entity & DTO
 
 ```go
 
