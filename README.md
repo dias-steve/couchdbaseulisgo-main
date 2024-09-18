@@ -26,7 +26,10 @@ go get https://github.com/dias-steve/couchdbaseulisgo-main.git
 ```
 /baseURL?currentPage=1&pageSize=10&whereQuery=field1==value1|field2<in>value2,value2&orderByQuery=-field1
 ```
-   - Separator for parameter whereQuery: |
+   - Separator for parameter whereQuery: 
+```
+    |
+```
    - Operator available for string comparaison: 
 ```
    =, !=, <, >, <=, >=, <in>, !<in>
@@ -35,7 +38,10 @@ go get https://github.com/dias-steve/couchdbaseulisgo-main.git
 ```
     ==, !==, <<, <<=, >>=, <<in>>, !<<in>>
 ```
-   - Separator for in comparaison: ,
+   - Separator for IN operator:
+```
+,
+```
 
  ## GET /baseURL/search
 
