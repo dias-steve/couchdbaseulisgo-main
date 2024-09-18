@@ -47,8 +47,12 @@ func (c *controllerGeneric[Entities, Dto]) GetAll(w http.ResponseWriter, r *http
 	methodName := "Conroller Generic > GetAll"
 	pageSize, currentPage := ExtractPageParamsFromRequest(r)
 	where, orderBy := ExtractWhereOrderByParamsFromRequest(r)
+	search := r.URL.Query().Get("query")
 
 	preWhere := []string{}
+
+	var result ResponseListWithPagination[[]Entities]
+	var err error
 
 	// Add the preWher query
 	if c.getPreWhereQueryFunc != nil {
@@ -57,11 +61,17 @@ func (c *controllerGeneric[Entities, Dto]) GetAll(w http.ResponseWriter, r *http
 
 	where = append(where, preWhere...)
 
-	result, err := c.repository.FindAllWithPagination(pageSize, currentPage, orderBy, where...)
+	if search != "" {
+		result, err = c.repository.Search(search, pageSize, currentPage, where...)
+	} else {
+		result, err = c.repository.FindAllWithPagination(pageSize, currentPage, orderBy, where...)
+	}
+
 	if err != nil {
 		HandleAndSendError(err, w, methodName)
 		return
 	}
+
 	resultDto := c.converter.ConvertListToDtoWithPagination(result)
 
 	w.Header().Set("Content-Type", "application/json")
