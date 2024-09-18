@@ -21,7 +21,7 @@ go get https://github.com/dias-steve/couchdbaseulisgo-main.git
    - POST /baseURL
 
  ## GET /baseURL
- Return all the entities
+ Return all entities with pagination
 ### Exemple of use:
 ```
 /baseURL?currentPage=1&pageSize=10&whereQuery=field1==value1|field2<in>value2,value2&orderByQuery=-field1
