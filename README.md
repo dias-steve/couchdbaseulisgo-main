@@ -22,11 +22,19 @@ go get https://github.com/dias-steve/couchdbaseulisgo-main.git
 
  ## GET /baseURL
  Return all the entities
-   - Exemple of use:
-   /baseURL?currentPage=1&pageSize=10&whereQuery=field1==ok|field2<in>value2,value2&orderByQuery=-field1
+### Exemple of use:
+```
+/baseURL?currentPage=1&pageSize=10&whereQuery=field1==value1|field2<in>value2,value2&orderByQuery=-field1
+```
    - Separator for parameter whereQuery: |
-   - Operator available for string comparaison: =, !=, <, >, <=, >=, <in>, !<in>
-   - Operator available for number comparaison: ==, !==, <<, <>, <<=, >>=, <<in>>, !<<in>>
+   - Operator available for string comparaison: 
+```
+   =, !=, <, >, <=, >=, <in>, !<in>
+```
+   - Operator available for number comparaison:
+```
+    ==, !==, <<, <<=, >>=, <<in>>, !<<in>>
+```
    - Separator for in comparaison: ,
 
  ## GET /baseURL/search
@@ -143,15 +151,8 @@ This function add where condition to the requested
         userId := context.Get(r, "user")
         userIdFormated := userId.(string)
 
-
         //Here we want just the user of the session
-
         whereConditionList = append( whereConditionList , "user_session_id = '"+userIdFormated+"'")
-
-
-
-
-
 		return whereConditionList
 	}
 ```
@@ -173,6 +174,9 @@ This function add where condition to the requested
 		HydrateEntities: hydateEntites,
         // the method to not expose
 		BlackListMethod: []string{"PUT", "POST", "DELETE"},
+        
+        GetPreWhereQueryGet: getPreWhereQuery,
+
 	}
 ```
 
